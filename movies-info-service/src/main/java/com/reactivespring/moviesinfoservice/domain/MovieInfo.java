@@ -18,7 +18,7 @@ public class MovieInfo {
     @Id
     private String movieInfoId;
     private String movieName;
-    private Date releaseYear;
+    private Date releaseDate;
     private List<String> cast;
 
 }
