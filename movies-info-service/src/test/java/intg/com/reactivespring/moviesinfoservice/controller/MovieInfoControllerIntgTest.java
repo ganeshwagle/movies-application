@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 @TestPropertySource(properties = "spring.mongodb.embedded.version=3.5.5")
-class MovieInfoControllerTest {
+class MovieInfoControllerIntgTest {
 
     final String movieInfoUrl = "/v1/movie-info";
     @Autowired
