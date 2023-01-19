@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = MovieInfoController.class)
@@ -55,7 +57,7 @@ class MovieInfoControllerUnitTest {
         String movieInfoId = "movie-3-id";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        when(movieInfoServiceMock.getMovieInfoById(movieInfoId))
+        when(movieInfoServiceMock.getMovieInfoById(isA(String.class)))
                 .thenReturn(Mono.just(
                         new MovieInfo("movie-3-id", "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"))));
 
@@ -72,6 +74,30 @@ class MovieInfoControllerUnitTest {
                     assertEquals(movieInfoId, movieInfo.getMovieInfoId());
                 });
 
+    }
+
+    @Test
+    void addMovieInfo() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        MovieInfo movieInfo = new MovieInfo("mockId", "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+
+        when(movieInfoServiceMock.saveMovieInfo(isA(MovieInfo.class)))
+                .thenReturn(Mono.just(movieInfo));
+
+        webTestClient
+                .post()
+                .uri(movieInfoUrl)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    MovieInfo response = movieInfoEntityExchangeResult.getResponseBody();
+                    assert response != null;
+                    assertNotNull(response.getMovieInfoId());
+                    assertEquals("mockId", movieInfo.getMovieInfoId());
+                });
     }
 
 }
