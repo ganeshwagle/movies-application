@@ -25,8 +25,7 @@ public class MovieInfoService {
     }
 
     public Mono<MovieInfo> getMovieInfoById(String movieInfoId) {
-        return movieInfoRepository.findById(movieInfoId)
-                .switchIfEmpty(Mono.error(new Exception("Invalid id!!!")));
+        return movieInfoRepository.findById(movieInfoId);
     }
 
     public Mono<MovieInfo> updateMovieInfoById(String movieInfoId, MovieInfo movieInfo) {
@@ -41,8 +40,7 @@ public class MovieInfoService {
                             && !movieInfo.getCast().isEmpty())
                         movieInfoFromDb.setCast(movieInfo.getCast());
                     return movieInfoRepository.save(movieInfoFromDb);
-                })
-                .switchIfEmpty(Mono.error(new Exception("Invalid id!!!")));
+                });
     }
 
     public Mono<String> deleteMovieInfoById(String movieInfoId) {

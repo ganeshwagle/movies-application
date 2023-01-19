@@ -167,7 +167,7 @@ class MovieInfoControllerUnitTest {
     @Test
     void addMovieInfoCastValidation() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        MovieInfo movieInfo = new MovieInfo("mockId", "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+        MovieInfo movieInfo = new MovieInfo("mockId", "movie-3", dateFormat.parse("2022-08-12"), List.of(""));
 
         webTestClient
                 .post()

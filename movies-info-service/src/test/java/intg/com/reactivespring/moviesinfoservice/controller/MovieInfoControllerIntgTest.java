@@ -135,4 +135,29 @@ class MovieInfoControllerIntgTest {
                 });
     }
 
+    @Test
+    void updateMovieInfoByIdNotFound() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String movieInfoId = "invalid-id";
+        MovieInfo updatedMovieInfo = new MovieInfo("movie-3-id", "movie-3-modified", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+        webTestClient
+                .put()
+                .uri(movieInfoUrl + "/{id}", movieInfoId)
+                .bodyValue(updatedMovieInfo)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
+    void getMovieInfoByIdNotFound() throws ParseException {
+        String movieInfoId = "invalid-id";
+        webTestClient
+                .get()
+                .uri(movieInfoUrl + "/{id}", movieInfoId)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
 }
