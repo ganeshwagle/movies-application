@@ -96,7 +96,7 @@ class MovieInfoControllerUnitTest {
                     MovieInfo response = movieInfoEntityExchangeResult.getResponseBody();
                     assert response != null;
                     assertNotNull(response.getMovieInfoId());
-                    assertEquals("mockId", movieInfo.getMovieInfoId());
+                    assertEquals("mockId", response.getMovieInfoId());
                 });
     }
 
@@ -141,6 +141,26 @@ class MovieInfoControllerUnitTest {
                 .consumeWith(stringEntityExchangeResult -> {
                     var msg = stringEntityExchangeResult.getResponseBody();
                     assertEquals("MovieInfo Deleted Successfully!!!", msg);
+                });
+    }
+
+    @Test
+    void addMovieInfoValidationException() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        MovieInfo movieInfo = new MovieInfo("mockId", "", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+
+        webTestClient
+                .post()
+                .uri(movieInfoUrl)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    String response = movieInfoEntityExchangeResult.getResponseBody();
+                    assert response != null;
+                    assertEquals("MovieInfo.movieName can't be empty", response);
                 });
     }
 
