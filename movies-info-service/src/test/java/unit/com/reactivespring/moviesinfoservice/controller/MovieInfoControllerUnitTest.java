@@ -100,4 +100,49 @@ class MovieInfoControllerUnitTest {
                 });
     }
 
+    @Test
+    void updateMovieInfoById() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String movieInfoId = "movie-3-id";
+        MovieInfo updatedMovieInfo = new MovieInfo("movie-3-id", "movie-3-modified", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+
+        when(movieInfoServiceMock.updateMovieInfoById(isA(String.class),isA(MovieInfo.class)))
+                .thenReturn(Mono.just(updatedMovieInfo));
+        webTestClient
+                .put()
+                .uri(movieInfoUrl + "/{id}", movieInfoId)
+                .bodyValue(updatedMovieInfo)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    MovieInfo movieInfo = movieInfoEntityExchangeResult.getResponseBody();
+                    assert movieInfo != null;
+                    assertEquals(movieInfoId, movieInfo.getMovieInfoId());
+                    assertEquals("movie-3-modified", movieInfo.getMovieName());
+                });
+    }
+
+    @Test
+    void deleteMovieInfoById() throws ParseException {
+        String movieInfoId = "movie-3-id";
+
+        when(movieInfoServiceMock.deleteMovieInfoById(isA(String.class)))
+                .thenReturn(Mono.just("MovieInfo Deleted Successfully!!!"));
+
+        webTestClient
+                .delete()
+                .uri(movieInfoUrl + "/{id}", movieInfoId)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    var msg = stringEntityExchangeResult.getResponseBody();
+                    assertEquals("MovieInfo Deleted Successfully!!!", msg);
+                });
+    }
+
+
 }
