@@ -164,5 +164,24 @@ class MovieInfoControllerUnitTest {
                 });
     }
 
+    @Test
+    void addMovieInfoCastValidation() throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        MovieInfo movieInfo = new MovieInfo("mockId", "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+
+        webTestClient
+                .post()
+                .uri(movieInfoUrl)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    String res = stringEntityExchangeResult.getResponseBody();
+                    assertNotNull(res);
+                });
+    }
+
 
 }
