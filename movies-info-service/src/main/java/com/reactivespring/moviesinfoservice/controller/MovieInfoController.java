@@ -28,7 +28,9 @@ public class MovieInfoController {
     }
 
     @GetMapping(value = "/movie-info", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<MovieInfo> getAllMovieInfo() {
+    public Flux<MovieInfo> getAllMovieInfo(@RequestParam(required = false, value = "year") String movieName) {
+        if(movieName != null && !movieName.isBlank())
+            return movieInfoService.findByMovieName(movieName);
         return movieInfoService.getAllMovieInfo();
     }
 

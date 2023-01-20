@@ -52,4 +52,8 @@ public class MovieInfoService {
                 })
                 .switchIfEmpty(Mono.just("Invalid id!!!"));
     }
+
+    public Flux<MovieInfo> findByMovieName(String movieName) {
+        return movieInfoRepository.findByMovieName(movieName);
+    }
 }

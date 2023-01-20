@@ -28,7 +28,7 @@ class MovieInfoRepositoryIntgTest {
         var movieList = List.of(
                 new MovieInfo(null, "movie-1", dateFormat.parse("2022-08-10"), List.of("actor1", "actor2", "actor3")),
                 new MovieInfo(null, "movie-2", dateFormat.parse("2022-08-11"), List.of("actor4", "actor5", "actor6")),
-                new MovieInfo(null, "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9")));
+                new MovieInfo(null, "movie-3", dateFormat.parse("2023-08-12"), List.of("actor7", "actor8", "actor9")));
         movieInfoRepository.saveAll(movieList)
                 .blockLast();
     }
@@ -45,6 +45,15 @@ class MovieInfoRepositoryIntgTest {
 
         StepVerifier.create(movieFlux)
                 .expectNextCount(3)
+                .verifyComplete();
+    }
+
+    @Test
+    void findAllByMovieName() {
+        var movieFlux = movieInfoRepository.findByMovieName("movie-1").log();
+
+        StepVerifier.create(movieFlux)
+                .expectNextCount(1)
                 .verifyComplete();
     }
 }
