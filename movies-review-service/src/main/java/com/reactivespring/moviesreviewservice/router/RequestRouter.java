@@ -22,7 +22,7 @@ public class RequestRouter {
                             .GET("", requestHandler::getAllMovies)
                             .GET("/{movieReviewId}", requestHandler::getMovieReviewById)
                             .PUT("/{movieReviewId}", requestHandler::updateMovieReview)
-                            .DELETE("", requestHandler::deleteMovieReviewById);
+                            .DELETE("/{movieReviewId}", requestHandler::deleteMovieReviewById);
                 })
               /*  .POST(baseUrl, requestHandler::addMovieReview)
                 .GET(baseUrl, requestHandler::getAllMovies)*/

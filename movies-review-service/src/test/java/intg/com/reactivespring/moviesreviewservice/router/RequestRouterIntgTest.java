@@ -34,7 +34,7 @@ class RequestRouterIntgTest {
         var movieList = List.of(
                 new MovieReview(null, "movie-1", "it was all right", 5D),
                 new MovieReview(null, "movie-2", "it was ok", 5D),
-                new MovieReview("movie-review-3", "movie-3", "it was awesome right", 8D));
+                new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D));
         movieReviewRepository.saveAll(movieList)
                 .blockLast();
     }
@@ -118,12 +118,24 @@ class RequestRouterIntgTest {
         String movieReviewId = "movie-review-3";
         webTestClient
                 .delete()
-                .uri(uriBuilder -> uriBuilder
-                        .path(movieReviewUrl)
-                        .queryParam("movieReviewId", movieReviewId)
-                        .build())
+                .uri(movieReviewUrl + "/" + movieReviewId)
                 .exchange()
                 .expectStatus()
                 .isNoContent();
+    }
+
+    @Test
+    void getAllMovieReviewsByMovieInfoId() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(movieReviewUrl)
+                        .queryParam("movieReviewId", "movie-2")
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(MovieReview.class)
+                .hasSize(2);
     }
 }
