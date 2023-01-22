@@ -1,53 +1,45 @@
 package com.reactivespring.moviesreviewservice.router;
 
+import com.reactivespring.moviesreviewservice.handler.RequestHandler;
 import com.reactivespring.moviesreviewservice.model.MovieReview;
 import com.reactivespring.moviesreviewservice.repository.MovieReviewRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@WebFluxTest
 @AutoConfigureWebTestClient
-@ActiveProfiles("movie-review-test")
-@TestPropertySource(properties = "spring.mongodb.embedded.version=3.5.5")
-class RequestRouterIntgTest {
+@ContextConfiguration(classes = {RequestRouter.class, RequestHandler.class})
+class RequestRouterUnitTest {
+
+    @MockBean
+    private MovieReviewRepository movieReviewRepository;
+
+    @Autowired
+    private WebTestClient webTestClient;
 
     final String movieReviewUrl = "/v1/movie-review";
-    @Autowired
-    WebTestClient webTestClient;
-    @Autowired
-    MovieReviewRepository movieReviewRepository;
-
-    @BeforeEach
-    void setUp() {
-        var movieList = List.of(
-                new MovieReview(null, "movie-1", "it was all right", 5D),
-                new MovieReview(null, "movie-2", "it was ok", 5D),
-                new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D));
-        movieReviewRepository.saveAll(movieList)
-                .blockLast();
-    }
-
-    @AfterEach
-    void tearDown() {
-        movieReviewRepository.deleteAll().block();
-    }
 
     @Test
     void addMovieReview() {
 
         MovieReview movieReview = new MovieReview(null, "movie-3", "it was awesome right", 10D);
+
+        when(movieReviewRepository.save(isA(MovieReview.class)))
+                .thenReturn(Mono.just(new MovieReview("movie-review-id", "movie-3", "it was awesome right", 10D)));
 
         webTestClient
                 .post()
@@ -66,6 +58,13 @@ class RequestRouterIntgTest {
 
     @Test
     void getAllMovieReviews() {
+
+        when(movieReviewRepository.findAll())
+                .thenReturn(Flux.fromIterable(List.of(
+                        new MovieReview(null, "movie-1", "it was all right", 5D),
+                        new MovieReview(null, "movie-2", "it was ok", 5D),
+                        new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D))));
+
         webTestClient
                 .get()
                 .uri(movieReviewUrl)
@@ -79,6 +78,10 @@ class RequestRouterIntgTest {
     @Test
     void getMovieReviewById() {
         String movieReviewId = "movie-review-3";
+
+        when(movieReviewRepository.findById(isA(String.class)))
+                .thenReturn(Mono.just(new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D)));
+
         webTestClient
                 .get()
                 .uri(movieReviewUrl + "/" + movieReviewId)
@@ -97,6 +100,14 @@ class RequestRouterIntgTest {
     void updateMovieReviewById() {
         String movieReviewId = "movie-review-3";
         MovieReview updatedMovieReview = new MovieReview(null, "movie-4", "it was alright", 5D);
+
+        when(movieReviewRepository.save(isA(MovieReview.class)))
+                .thenReturn(Mono.just(new MovieReview("movie-review-3", "movie-4", "it was alright", 5D)));
+
+        when(movieReviewRepository.findById(isA(String.class)))
+                .thenReturn(Mono.just(
+                        new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D)));
+
         webTestClient
                 .put()
                 .uri(movieReviewUrl + "/" + movieReviewId)
@@ -116,6 +127,10 @@ class RequestRouterIntgTest {
     @Test
     void deleteMovieReviewById() {
         String movieReviewId = "movie-review-3";
+
+        when(movieReviewRepository.deleteById(isA(String.class)))
+                .thenReturn(Mono.empty());
+
         webTestClient
                 .delete()
                 .uri(movieReviewUrl + "/" + movieReviewId)
@@ -126,6 +141,12 @@ class RequestRouterIntgTest {
 
     @Test
     void getAllMovieReviewsByMovieInfoId() {
+
+        when(movieReviewRepository.findByMovieInfoId(isA(String.class)))
+                .thenReturn(Flux.fromIterable(List.of(
+                        new MovieReview(null, "movie-2", "it was ok", 5D),
+                        new MovieReview("movie-review-3", "movie-2", "it was awesome right", 8D))));
+
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -138,4 +159,5 @@ class RequestRouterIntgTest {
                 .expectBodyList(MovieReview.class)
                 .hasSize(2);
     }
+
 }

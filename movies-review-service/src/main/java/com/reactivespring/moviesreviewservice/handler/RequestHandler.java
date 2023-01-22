@@ -69,8 +69,7 @@ public class RequestHandler {
 
     public Mono<ServerResponse> deleteMovieReviewById(ServerRequest serverRequest) {
         String movieReviewId = serverRequest.pathVariable("movieReviewId");
-        return movieReviewRepository.findById(movieReviewId)
-                .flatMap(res -> ServerResponse.noContent().build())
-                .switchIfEmpty(ServerResponse.badRequest().build());
+        return movieReviewRepository.deleteById(movieReviewId)
+                .then(ServerResponse.noContent().build());
     }
 }
