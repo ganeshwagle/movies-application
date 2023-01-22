@@ -1,6 +1,7 @@
 package com.reactivespring.moviesreviewservice.exceptionHandler;
 
 import com.reactivespring.moviesreviewservice.exception.MovieReviewDataException;
+import com.reactivespring.moviesreviewservice.exception.MovieReviewNotFoundException;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -21,7 +22,10 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
             return exchange.getResponse().writeWith(Mono.just(message));
         }
-
+        if(ex instanceof MovieReviewNotFoundException){
+            exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+            return exchange.getResponse().writeWith(Mono.just(message));
+        }
         exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
         return exchange.getResponse().writeWith(Mono.just(message));
     }

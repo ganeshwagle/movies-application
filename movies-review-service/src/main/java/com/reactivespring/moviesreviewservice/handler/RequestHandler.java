@@ -1,6 +1,7 @@
 package com.reactivespring.moviesreviewservice.handler;
 
 import com.reactivespring.moviesreviewservice.exception.MovieReviewDataException;
+import com.reactivespring.moviesreviewservice.exception.MovieReviewNotFoundException;
 import com.reactivespring.moviesreviewservice.model.MovieReview;
 import com.reactivespring.moviesreviewservice.repository.MovieReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,18 +74,20 @@ public class RequestHandler {
                 })
                 .flatMap(ServerResponse.ok()::bodyValue)
                 .switchIfEmpty(ServerResponse.noContent().build());*/
-        return serverRequest.bodyToMono(MovieReview.class)
-                .flatMap(movieReview -> movieReviewRepository
-                        .findById(movieReviewId)
-                        .flatMap(movieReviewInDb -> {
-                            if (movieReview.getMovieInfoId() != null && !movieReview.getMovieInfoId().isBlank())
-                                movieReviewInDb.setMovieInfoId(movieReview.getMovieInfoId());
-                            if (movieReview.getComment() != null && !movieReview.getComment().isBlank())
-                                movieReviewInDb.setComment(movieReview.getComment());
-                            if (movieReview.getRating() != null)
-                                movieReviewInDb.setRating(movieReview.getRating());
-                            return movieReviewRepository.save(movieReviewInDb);
-                        })
+        Mono<MovieReview> existingReview = movieReviewRepository.findById(movieReviewId)
+                .switchIfEmpty(Mono.error(new MovieReviewNotFoundException("Movie Review not found for id  " + movieReviewId)));
+        return existingReview
+                .flatMap(movieReviewInDb ->
+                        serverRequest.bodyToMono(MovieReview.class)
+                                .flatMap(movieReview -> {
+                                    if (movieReview.getMovieInfoId() != null && !movieReview.getMovieInfoId().isBlank())
+                                        movieReviewInDb.setMovieInfoId(movieReview.getMovieInfoId());
+                                    if (movieReview.getComment() != null && !movieReview.getComment().isBlank())
+                                        movieReviewInDb.setComment(movieReview.getComment());
+                                    if (movieReview.getRating() != null)
+                                        movieReviewInDb.setRating(movieReview.getRating());
+                                    return movieReviewRepository.save(movieReviewInDb);
+                                })
                 )
                 .flatMap(ServerResponse.ok()::bodyValue);
     }
