@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.path;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -16,8 +17,12 @@ public class RequestRouter {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(RequestHandler requestHandler){
         return route()
-                .POST(baseUrl, requestHandler::addMovieReview)
-                .GET(baseUrl, requestHandler::getAllMovies)
+                .nest(path(baseUrl), builder -> {
+                    builder.POST("", requestHandler::addMovieReview)
+                            .GET("", requestHandler::getAllMovies);
+                })
+              /*  .POST(baseUrl, requestHandler::addMovieReview)
+                .GET(baseUrl, requestHandler::getAllMovies)*/
                 .build();
     }
 
