@@ -1,5 +1,6 @@
 package com.reactivespring.moviesreviewservice.router;
 
+import com.reactivespring.moviesreviewservice.exceptionHandler.GlobalExceptionHandler;
 import com.reactivespring.moviesreviewservice.handler.RequestHandler;
 import com.reactivespring.moviesreviewservice.model.MovieReview;
 import com.reactivespring.moviesreviewservice.repository.MovieReviewRepository;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 @WebFluxTest
 @AutoConfigureWebTestClient
-@ContextConfiguration(classes = {RequestRouter.class, RequestHandler.class})
+@ContextConfiguration(classes = {RequestRouter.class, RequestHandler.class, GlobalExceptionHandler.class})
 class RequestRouterUnitTest {
 
     @MockBean
@@ -158,6 +159,28 @@ class RequestRouterUnitTest {
                 .isOk()
                 .expectBodyList(MovieReview.class)
                 .hasSize(2);
+    }
+
+    @Test
+    void addMovieReviewValidation() {
+
+        MovieReview movieReview = new MovieReview(null, null, "it was awesome right", -10D);
+
+        when(movieReviewRepository.save(isA(MovieReview.class)))
+                .thenReturn(Mono.just(new MovieReview("movie-review-id", "movie-3", "it was awesome right", 10D)));
+
+        webTestClient
+                .post()
+                .uri(movieReviewUrl)
+                .bodyValue(movieReview)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    String msg = stringEntityExchangeResult.getResponseBody();
+                    assertEquals("MovieReview.movieInfoId can't be null!!!,MovieReview.rating can't be negative!!!", msg);
+                });
     }
 
 }
