@@ -19,7 +19,10 @@ public class RequestRouter {
         return route()
                 .nest(path(baseUrl), builder -> {
                     builder.POST("", requestHandler::addMovieReview)
-                            .GET("", requestHandler::getAllMovies);
+                            .GET("", requestHandler::getAllMovies)
+                            .GET("/{movieReviewId}", requestHandler::getMovieReviewById)
+                            .PUT("/{movieReviewId}", requestHandler::updateMovieReview)
+                            .DELETE("", requestHandler::deleteMovieReviewById);
                 })
               /*  .POST(baseUrl, requestHandler::addMovieReview)
                 .GET(baseUrl, requestHandler::getAllMovies)*/
