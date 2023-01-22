@@ -35,7 +35,7 @@ public class RequestHandler {
 
     public Mono<ServerResponse> updateMovieReview(ServerRequest serverRequest) {
         String movieReviewId = serverRequest.pathVariable("movieReviewId");
-        return serverRequest.bodyToMono(MovieReview.class)
+        /*return serverRequest.bodyToMono(MovieReview.class)
                 .zipWith(movieReviewRepository.findById(movieReviewId))
                 .flatMap(tuple -> {
                     MovieReview movieReview = tuple.getT1();
@@ -49,7 +49,21 @@ public class RequestHandler {
                     return movieReviewRepository.save(movieReviewInDb);
                 })
                 .flatMap(ServerResponse.ok()::bodyValue)
-                .switchIfEmpty(ServerResponse.noContent().build());
+                .switchIfEmpty(ServerResponse.noContent().build());*/
+        return serverRequest.bodyToMono(MovieReview.class)
+                .flatMap( movieReview -> movieReviewRepository
+                        .findById(movieReviewId)
+                        .flatMap(movieReviewInDb -> {
+                            if (movieReview.getMovieInfoId() != null && !movieReview.getMovieInfoId().isBlank())
+                                movieReviewInDb.setMovieInfoId(movieReview.getMovieInfoId());
+                            if (movieReview.getComment() != null && !movieReview.getComment().isBlank())
+                                movieReviewInDb.setComment(movieReview.getComment());
+                            if (movieReview.getRating() != null)
+                                movieReviewInDb.setRating(movieReview.getRating());
+                            return movieReviewRepository.save(movieReviewInDb);
+                        })
+                )
+                .flatMap(ServerResponse.ok()::bodyValue);
     }
 
     public Mono<ServerResponse> deleteMovieReviewById(ServerRequest serverRequest) {
