@@ -11,7 +11,7 @@ spring:
     mongodb:
       host: localhost
       port: 27017
-      database: movie_info
+      database: movie_application
 
 ---
 spring:
