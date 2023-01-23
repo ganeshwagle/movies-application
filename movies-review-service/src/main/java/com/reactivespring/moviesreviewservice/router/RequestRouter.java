@@ -11,11 +11,10 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 @Configuration
 public class RequestRouter {
-    private final String baseUrl = "/v1/movie-review";
-
 
     @Bean
     public RouterFunction<ServerResponse> routerFunction(RequestHandler requestHandler){
+        String baseUrl = "/v1/movie-review";
         return route()
                 .nest(path(baseUrl), builder -> {
                     builder.POST("", requestHandler::addMovieReview)

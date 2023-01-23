@@ -47,7 +47,7 @@ public class RequestHandler {
     }
 
     public Mono<ServerResponse> getAllMovies(ServerRequest serverRequest) {
-        Optional<String> movieInfoIdOpt = serverRequest.queryParam("movieReviewId");
+        Optional<String> movieInfoIdOpt = serverRequest.queryParam("movieInfoId");
         return movieInfoIdOpt.map(s -> ServerResponse.ok().body(movieReviewRepository.findByMovieInfoId(s), MovieReview.class)).orElseGet(() -> ServerResponse.ok().body(movieReviewRepository.findAll(), MovieReview.class));
     }
 
