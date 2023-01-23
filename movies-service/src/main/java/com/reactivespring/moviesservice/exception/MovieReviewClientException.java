@@ -3,9 +3,13 @@ package com.reactivespring.moviesservice.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.io.Serial;
+
 @Getter
 public class MovieReviewClientException extends RuntimeException {
 
+    @Serial
+    private static final long serialVersionUID = -4311482494462166304L;
     String message;
     HttpStatus statusCode;
 

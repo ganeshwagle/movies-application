@@ -1,16 +1,17 @@
 package com.reactivespring.moviesservice.exception;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
+
+import java.io.Serial;
 
 @Getter
 public class MovieInfoServerException extends RuntimeException {
+    @Serial
+    private static final long serialVersionUID = 3637953011120388357L;
     String message;
-    HttpStatus statusCode;
 
-    public MovieInfoServerException(String message, HttpStatus statusCode) {
+    public MovieInfoServerException(String message) {
         super(message);
         this.message = message;
-        this.statusCode = statusCode;
     }
 }

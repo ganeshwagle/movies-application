@@ -1,6 +1,7 @@
 package com.reactivespring.moviesservice.service;
 
 import com.reactivespring.moviesservice.exception.MovieInfoClientException;
+import com.reactivespring.moviesservice.exception.MovieInfoServerException;
 import com.reactivespring.moviesservice.model.MovieInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ public class MovieInfoService {
                     return clientResponse.bodyToMono(String.class)
                             .flatMap(response -> Mono.error(new MovieInfoClientException(response, clientResponse.statusCode())));
                 })
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieInfoServerException("Server Exception in Movie Info Service")))
                 .bodyToMono(MovieInfo.class);
     }
 
