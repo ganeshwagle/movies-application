@@ -1,0 +1,14 @@
+[
+  {
+    "movieReviewId": "63ccb8a9619cf01aa35d3a77",
+    "movieInfoId": "63ccb87be92d876d481dbf8d",
+    "comment": "it was ok",
+    "rating": 2.5
+  },
+  {
+    "movieReviewId": "63cde317c8deb67ada5a1f1b",
+    "movieInfoId": "63ccb87be92d876d481dbf8d",
+    "comment": "good",
+    "rating": 6.0
+  }
+]
