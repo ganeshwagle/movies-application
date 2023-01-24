@@ -3,6 +3,7 @@ package com.reactivespring.moviesservice.service;
 import com.reactivespring.moviesservice.exception.MovieInfoClientException;
 import com.reactivespring.moviesservice.exception.MovieInfoServerException;
 import com.reactivespring.moviesservice.model.MovieInfo;
+import com.reactivespring.moviesservice.utils.RetryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -39,12 +40,13 @@ public class MovieInfoService {
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieInfoServerException("Server Exception in Movie Info Service")))
                 .bodyToMono(MovieInfo.class)
                 //.retry(3)
-                .retryWhen(
+               /* .retryWhen(
                         Retry.fixedDelay(3, Duration.ofSeconds(1))
                                 .filter(ex -> ex instanceof MovieInfoServerException)
                                 .onRetryExhaustedThrow( //this is to throw the actual exception
                                         (retryBackoffSpec, retrySignal) -> Exceptions.propagate(retrySignal.failure())
-                                ));
+                                ));*/
+                .retryWhen(RetryUtil.retryLogic());
     }
 
 }

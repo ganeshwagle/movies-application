@@ -3,6 +3,7 @@ package com.reactivespring.moviesservice.service;
 import com.reactivespring.moviesservice.exception.MovieReviewClientException;
 import com.reactivespring.moviesservice.exception.MovieReviewServerException;
 import com.reactivespring.moviesservice.model.MovieReview;
+import com.reactivespring.moviesservice.utils.RetryUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,8 @@ public class MovieReviewService {
                             .flatMap(response -> Mono.error(new MovieReviewClientException(response, clientResponse.statusCode())));
                 })
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieReviewServerException("Server Exception in Movie Review Service")))
-                .bodyToFlux(MovieReview.class);
+                .bodyToFlux(MovieReview.class)
+                .retryWhen(RetryUtil.retryLogic());
 
     }
 
