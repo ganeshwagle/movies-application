@@ -33,7 +33,8 @@ public class MovieInfoService {
                             .flatMap(response -> Mono.error(new MovieInfoClientException(response, clientResponse.statusCode())));
                 })
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieInfoServerException("Server Exception in Movie Info Service")))
-                .bodyToMono(MovieInfo.class);
+                .bodyToMono(MovieInfo.class)
+                .retry(3);
     }
 
 }
