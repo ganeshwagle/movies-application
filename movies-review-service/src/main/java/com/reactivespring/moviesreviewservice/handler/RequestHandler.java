@@ -6,10 +6,12 @@ import com.reactivespring.moviesreviewservice.model.MovieReview;
 import com.reactivespring.moviesreviewservice.repository.MovieReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -26,10 +28,13 @@ public class RequestHandler {
     @Autowired
     private MovieReviewRepository movieReviewRepository;
 
+    Sinks.Many<MovieReview> movieReviewSink = Sinks.many().replay().latest();
+
     public Mono<ServerResponse> addMovieReview(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(MovieReview.class)
                 .doOnNext(this::validate)
                 .flatMap(movieReviewRepository::save)
+                .doOnNext(movieReview -> movieReviewSink.tryEmitNext(movieReview))
                 .flatMap(ServerResponse.status(HttpStatus.CREATED)::bodyValue);
     }
 
@@ -96,5 +101,12 @@ public class RequestHandler {
         String movieReviewId = serverRequest.pathVariable("movieReviewId");
         return movieReviewRepository.deleteById(movieReviewId)
                 .then(ServerResponse.noContent().build());
+    }
+
+    public Mono<ServerResponse> getMovieReviewStream(ServerRequest serverRequest) {
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_NDJSON)
+                .body(movieReviewSink, MovieReview.class)
+                .log();
     }
 }

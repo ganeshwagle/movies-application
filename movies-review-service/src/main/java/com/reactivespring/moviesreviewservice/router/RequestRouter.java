@@ -13,7 +13,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RequestRouter {
 
     @Bean
-    public RouterFunction<ServerResponse> routerFunction(RequestHandler requestHandler){
+    public RouterFunction<ServerResponse> routerFunction(RequestHandler requestHandler) {
         String baseUrl = "/v1/movie-review";
         return route()
                 .nest(path(baseUrl), builder -> {
@@ -21,10 +21,12 @@ public class RequestRouter {
                             .GET("", requestHandler::getAllMovies)
                             .GET("/{movieReviewId}", requestHandler::getMovieReviewById)
                             .PUT("/{movieReviewId}", requestHandler::updateMovieReview)
-                            .DELETE("/{movieReviewId}", requestHandler::deleteMovieReviewById);
+                            .DELETE("/{movieReviewId}", requestHandler::deleteMovieReviewById)
+                    .GET("/stream", requestHandler::getMovieReviewStream);
+
                 })
-              /*  .POST(baseUrl, requestHandler::addMovieReview)
-                .GET(baseUrl, requestHandler::getAllMovies)*/
+                /*  .POST(baseUrl, requestHandler::addMovieReview)
+                  .GET(baseUrl, requestHandler::getAllMovies)*/
                 .build();
     }
 

@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,6 +68,43 @@ class MovieInfoControllerIntgTest {
                     assert response != null;
                     assertNotNull(response.getMovieInfoId());
                 });
+    }
+
+    @Test
+    void getAllMovieInfoStream() throws ParseException {
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        MovieInfo movieInfo = new MovieInfo(null, "movie-3", dateFormat.parse("2022-08-12"), List.of("actor7", "actor8", "actor9"));
+
+        webTestClient
+                .post()
+                .uri(movieInfoUrl)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    MovieInfo response = movieInfoEntityExchangeResult.getResponseBody();
+                    assert response != null;
+                    assertNotNull(response.getMovieInfoId());
+                });
+
+        Flux<MovieInfo> movieInfoFlux = webTestClient
+                .get()
+                .uri(movieInfoUrl + "/stream")
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .returnResult(MovieInfo.class)
+                .getResponseBody();
+
+        StepVerifier.create(movieInfoFlux)
+                .assertNext(movieInfo1 -> {
+                    assert movieInfo1.getMovieInfoId()  != null;
+                })
+                .thenCancel()
+                .verify();
     }
 
     @Test
