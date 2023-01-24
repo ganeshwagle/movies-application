@@ -30,9 +30,13 @@ public class MovieReviewService {
                         .toUriString()
                 )
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, clientResponse ->
-                        clientResponse.bodyToMono(String.class)
-                                .flatMap(response -> Mono.error(new MovieReviewClientException(response, clientResponse.statusCode()))))
+                .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
+                    if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
+                        return Mono.empty();
+                    }
+                    return clientResponse.bodyToMono(String.class)
+                            .flatMap(response -> Mono.error(new MovieReviewClientException(response, clientResponse.statusCode())));
+                })
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieReviewServerException("Server Exception in Movie Review Service")))
                 .bodyToFlux(MovieReview.class);
 

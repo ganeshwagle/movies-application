@@ -53,4 +53,24 @@ class MovieControllerTest {
 
     }
 
+    @Test
+    public void getMovieByIdWith404() {
+        String movieInfoId = "63ccb87be92d876d481dbf8d";
+        stubFor(
+                get(urlEqualTo("/v1/movie-info/" + movieInfoId))
+                        .willReturn(aResponse().withStatus(404)));
+        stubFor(
+                get(urlPathEqualTo("/v1/movie-review"))
+                        .willReturn(aResponse()
+                                .withHeader("Content-Type", "application/json")
+                                .withBodyFile("movie-review.json")));
+        webTestClient
+                .get()
+                .uri("/v1/movies/" + movieInfoId)
+                .exchange()
+                .expectStatus()
+                .is4xxClientError();
+
+    }
+
 }
