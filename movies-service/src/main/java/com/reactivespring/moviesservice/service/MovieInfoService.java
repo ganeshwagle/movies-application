@@ -41,6 +41,7 @@ public class MovieInfoService {
                 //.retry(3)
                 .retryWhen(
                         Retry.fixedDelay(3, Duration.ofSeconds(1))
+                                .filter(ex -> ex instanceof MovieInfoServerException)
                                 .onRetryExhaustedThrow( //this is to throw the actual exception
                                         (retryBackoffSpec, retrySignal) -> Exceptions.propagate(retrySignal.failure())
                                 ));
