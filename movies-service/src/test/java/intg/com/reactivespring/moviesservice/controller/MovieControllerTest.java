@@ -19,6 +19,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @AutoConfigureWireMock(port = 8085)
 @TestPropertySource(
         properties = {
+                "wiremock.server.httpsPort=-1",
                 "baseUrl.movieInfo=http://localhost:8085/v1/movie-info",
                 "baseUrl.movieReview=http://localhost:8085/v1/movie-review"
         }
@@ -35,12 +36,12 @@ class MovieControllerTest {
                 get(urlEqualTo("/v1/movie-info/" + movieInfoId))
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
-                                .withBodyFile("movie-info.json")));
+                                .withBodyFile("movieInfo.json")));
         stubFor(
                 get(urlPathEqualTo("/v1/movie-review"))
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
-                                .withBodyFile("movie-review.json")));
+                                .withBodyFile("movieReview.json")));
         webTestClient
                 .get()
                 .uri("/v1/movies/" + movieInfoId)
@@ -64,7 +65,7 @@ class MovieControllerTest {
                 get(urlPathEqualTo("/v1/movie-review"))
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", "application/json")
-                                .withBodyFile("movie-review.json")));
+                                .withBodyFile("movieReview.json")));
         webTestClient
                 .get()
                 .uri("/v1/movies/" + movieInfoId)
@@ -80,11 +81,6 @@ class MovieControllerTest {
         stubFor(
                 get(urlEqualTo("/v1/movie-info/" + movieInfoId))
                         .willReturn(aResponse().withStatus(500)));
-        stubFor(
-                get(urlPathEqualTo("/v1/movie-review"))
-                        .willReturn(aResponse()
-                                .withHeader("Content-Type", "application/json")
-                                .withBodyFile("movie-review.json")));
         webTestClient
                 .get()
                 .uri("/v1/movies/" + movieInfoId)
