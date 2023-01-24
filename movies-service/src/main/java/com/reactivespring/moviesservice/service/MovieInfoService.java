@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Service
 public class MovieInfoService {
@@ -34,7 +38,12 @@ public class MovieInfoService {
                 })
                 .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new MovieInfoServerException("Server Exception in Movie Info Service")))
                 .bodyToMono(MovieInfo.class)
-                .retry(3);
+                //.retry(3)
+                .retryWhen(
+                        Retry.fixedDelay(3, Duration.ofSeconds(1))
+                                .onRetryExhaustedThrow( //this is to throw the actual exception
+                                        (retryBackoffSpec, retrySignal) -> Exceptions.propagate(retrySignal.failure())
+                                ));
     }
 
 }
